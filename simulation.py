@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 
 # print(FreqEvaluator(**ExampleEvaluator().get_params()).evaluate())
 # print('-'*100)
+# evaluation = FreqEvaluator(**ExampleEvaluator().get_params())
 
-best_params = SimulatedAnnealing(FreqEvaluator).optimize_parameters()
+best_params = GeneticAlgorithm(FreqEvaluator).optimize_parameters(50, 50)
 evaluation = FreqEvaluator(**best_params)
 
 print(evaluation.evaluate())

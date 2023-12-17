@@ -6,13 +6,12 @@ from .models import *
 
 class FreqEvaluator(EvaluationBase):
 
-    def evaluate(self, N=1000, t_end=200):
+    def evaluate(self, T=np.linspace(0, 200, 1000)):
         """
         Search for the biggest amount of waves
         """
         params_ff = self.params
-        Y0 = np.array([0] * 12)
-        T = np.linspace(0, t_end, N)
+        Y0 = np.zeros(12)
         Y = odeint(three_bit_model, Y0, T, args=(params_ff,))
         Y_reshaped = np.split(Y, Y.shape[1], 1)
 
@@ -32,4 +31,4 @@ class FreqEvaluator(EvaluationBase):
         potential_wave = mask_high | mask_low
         transitions = np.sum(potential_wave[:-1] != potential_wave[1:])
         wave_count = transitions // 2
-        return wave_count
+        return wave_count * np.log(flattened_arr.max() - flattened_arr.min())
