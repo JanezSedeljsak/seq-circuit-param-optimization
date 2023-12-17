@@ -4,13 +4,15 @@ from scipy.integrate import odeint
 from .models import *
 from .params import *
 
+Params = namedtuple('Params', ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n'])
+
 class EvaluationBase:
     """
     Base class for models.
 
     Attributes:
-        params_struct (namedtuple): Structure to hold model parameters.
-        params (params_struct): Model parameters.
+        Params (namedtuple): Structure to hold model parameters.
+        params (Params): Model parameters.
     """
 
     def __init__(self, **kwargs):
@@ -20,8 +22,7 @@ class EvaluationBase:
         Args:
             **kwargs: Keyword arguments to set the initial model parameters.
         """
-        self.params_struct = namedtuple('Params', ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n'])
-        self.params = self.params_struct(**kwargs)
+        self.params = Params(**kwargs)
 
     def set_params(self, **kwargs):
         """
@@ -31,7 +32,7 @@ class EvaluationBase:
             **kwargs: Keyword arguments to update the model parameters.
         """
         params_dict = self.params._asdict()
-        self.params = self.params_struct({**params_dict, **kwargs})
+        self.params = Params(**{**params_dict, **kwargs})
 
     def evaluate(self):
         """
@@ -46,7 +47,7 @@ class EvaluationBase:
         """
         raise MethodNotImplementedError()
 
-    def simulate(self, N=1000, t_end=200):
+    def simulate(self, N=1000, t_end=200, out=None):
         """
         Simulates the model.
 
@@ -73,6 +74,7 @@ class EvaluationBase:
         Q3 = Y_reshaped[10]
         not_Q3 = Y_reshaped[11]
 
+        plt.clf() # clear plot       
         plt.plot(T, Q1, label='q1')
         plt.plot(T, Q2, label='q2')
         plt.plot(T, Q3, label='q3')
@@ -81,7 +83,10 @@ class EvaluationBase:
 
         plt.plot(T, get_clock(T), '--', linewidth=2, label="CLK", color='black', alpha=0.25)
         plt.legend()
-        plt.show()
+
+        if out is None: plt.show()
+        else: plt.savefig(out)
+
 
     def get_params(self):
         """
