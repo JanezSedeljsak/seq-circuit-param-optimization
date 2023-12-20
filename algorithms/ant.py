@@ -2,7 +2,7 @@ import numpy as np
 from .base import OptimizationAlgorithm
 
 class AntColonyOptimization(OptimizationAlgorithm):
-    def __init__(self, evaluator, num_ants=20, max_iterations=50, alpha=2.0, rho=0.5, elite=0.2):
+    def __init__(self, evaluator, num_ants=5, max_iterations=100, alpha=2.0, rho=0.5, elite=0.2):
         super().__init__(evaluator)
         self.num_ants = num_ants
         self.max_iterations = max_iterations
@@ -40,7 +40,7 @@ class AntColonyOptimization(OptimizationAlgorithm):
         self.pheromones *= (1 - self.rho)
         self.pheromones += np.dot(solutions.T, scores)
 
-    def _evaluate_solution(self, params):
+    def _evaluate_function(self, params):
         params_dict = dict(zip(self.param_names, params))
         return self.evaluator(**params_dict).evaluate()
 
@@ -52,7 +52,7 @@ class AntColonyOptimization(OptimizationAlgorithm):
 
         for itt in range(self.max_iterations):
             ant_solutions = np.array([self._move_ant() for _ in range(self.num_ants)])
-            ant_scores = np.array([self._evaluate_solution(params) for params in ant_solutions])
+            ant_scores = np.array([self._evaluate_function(params) for params in ant_solutions])
 
             if np.max(ant_scores) > best_score:
                 best_solution = ant_solutions[np.argmax(ant_scores)]
