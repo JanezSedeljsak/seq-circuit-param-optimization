@@ -1,10 +1,13 @@
 from .base import EvaluationBase
 from scipy.integrate import odeint
-from scipy.signal import find_peaks
 import numpy as np
 from .models import *
 
 class FreqEvaluator(EvaluationBase):
+
+    @classmethod
+    def single_eval(cls, Q1, Q2, Q3, C):
+        return np.sum([cls.count_waves(Q1), cls.count_waves(Q2), cls.count_waves(Q3)])
 
     def evaluate(self, T=np.linspace(0, 200, 1000)):
         """
@@ -18,8 +21,9 @@ class FreqEvaluator(EvaluationBase):
         Q1 = Y_reshaped[2]
         Q2 = Y_reshaped[6]
         Q3 = Y_reshaped[10]
-        return np.sum([self.count_waves(Q1), self.count_waves(Q2), self.count_waves(Q3)])
+        return self.single_eval(Q1, Q2, Q3, None)
 
+    @classmethod
     def count_waves(self, arr):
         flattened_arr = arr.flatten()
         if flattened_arr.max() - flattened_arr.min() < 20.0:

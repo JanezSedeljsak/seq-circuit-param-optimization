@@ -2,8 +2,8 @@ import numpy as np
 from .base import OptimizationAlgorithm
 
 class GeneticAlgorithm(OptimizationAlgorithm):
-    def __init__(self, evaluator, mutation_rate=0.4, elite_percentage=0.3):
-        super().__init__(evaluator)
+    def __init__(self, evaluator, mutation_rate=0.4, elite_percentage=0.3, joined=[]):
+        super().__init__(evaluator, joined=joined)
         self.param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
         self.mutation_rate = mutation_rate
         self.elite_percentage = elite_percentage
@@ -34,11 +34,12 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
     def _evaluate_function(self, params):
         params_dict = dict(zip(self.param_names, params))
-        return self.evaluator(**params_dict).evaluate()
+        return self.evaluator(*self.joined, **params_dict).evaluate()
 
     def evolve(self):
         population = self.initialize_population()
         elite_count = int(self.elite_percentage * len(population))
+        prev_best = None
 
         for itt in range(self.generations):
             sorted_indices = np.argsort([-self._evaluate_function(individual) for individual in population])
@@ -55,7 +56,11 @@ class GeneticAlgorithm(OptimizationAlgorithm):
             population = new_population
 
             best_individual = max(population, key=lambda x: self._evaluate_function(x))
-            print(f'[{itt}] Update best with {self._evaluate_function(best_individual):.2f}')
+            current_eval = self._evaluate_function(best_individual)
+            if prev_best is None or current_eval > prev_best:
+                prev_best = current_eval
+                print(f'[{itt}] Update best with {current_eval:.5f}')
+
             self.best_solution = best_individual
 
         return self.best_solution

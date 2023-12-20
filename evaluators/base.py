@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from collections import namedtuple
 from scipy.integrate import odeint
@@ -7,6 +8,9 @@ from .params import *
 Params = namedtuple('Params', ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n'])
 
 class EvaluationBase:
+    standardization = None
+    standardization_base = None
+    starting_point = [34.73, 49.36, 32.73, 49.54, 1.93, 0.69, 10.44, 4.35]
     """
     Base class for models.
 
@@ -75,14 +79,14 @@ class EvaluationBase:
         not_Q3 = Y_reshaped[11]
 
         plt.clf() # clear plot       
-        plt.plot(T, Q1, label='q1')
-        plt.plot(T, Q2, label='q2')
-        plt.plot(T, Q3, label='q3')
+        plt.plot(T, Q1, label='q1', marker='o', markersize=3)
+        plt.plot(T, Q2, label='q2', marker='x', markersize=3)
+        plt.plot(T, Q3, label='q3', marker='*', markersize=3)
         # plt.plot(T, not_Q1, label='not q1')
         # plt.plot(T, not_Q2, label='not q2')
 
         plt.plot(T, get_clock(T), '--', linewidth=2, label="CLK", color='black', alpha=0.25)
-        plt.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
         if out is None: plt.show()
         else: plt.savefig(out)
@@ -96,3 +100,28 @@ class EvaluationBase:
             dict: Dictionary of model parameters.
         """
         return self.params._asdict()
+
+    @classmethod
+    def get_standardization(cls):
+        bounds = np.array([
+            (0.01, 50),  # alpha1
+            (0.01, 50),  # alpha2
+            (0.01, 50),  # alpha3
+            (0.01, 50),  # alpha4
+            (0.001, 100),  # delta1
+            (0.001, 100),  # delta2
+            (0.01, 250),  # Kd
+            (1, 5)  # n
+        ])
+        if cls.standardization is not None:
+            return cls.standardization
+
+        if cls.standardization_base is None:
+            cls.standardization_base = np.random.uniform(low=bounds[:, 0], high=bounds[:, 1], size=(100, 8))
+
+        param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
+        evaluators = [cls(**dict(zip(param_names, params))) for params in cls.standardization_base]
+        results = [evaluator.evaluate() for evaluator in evaluators]
+        baseline_score = cls(**dict(zip(param_names, cls.starting_point))).evaluate()
+        cls.standardization = np.mean(results), np.std(results), baseline_score
+        return cls.standardization
