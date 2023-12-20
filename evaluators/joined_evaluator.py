@@ -29,7 +29,7 @@ class JoinedEvaluator(EvaluationBase):
             randoms_mean, randoms_std, baseline = evaluator.get_standardization()
 
             scaled_score = (current_score - randoms_mean) / (baseline - randoms_mean)
-            scaled_score += scaled_score * (np.log(randoms_std + 1) / 100)
+            scaled_score += scaled_score * (np.log(randoms_std + 1) / (T.shape[0]) * .5)
             scores.append(scaled_score)
 
         return np.sum(scores)

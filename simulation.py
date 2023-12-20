@@ -38,7 +38,7 @@ if sys.argv and len(sys.argv) > 1:
         print(evaluation.evaluate())
         evaluation.simulate()
     elif method == 'ant':
-        best_params = AntColonyOptimization(FreqEvaluator).optimize_parameters()
+        best_params = AntColonyOptimization(FreqEvaluator).optimize_parameters(POPULATION_SIZE, GENERATIONS)
         evaluation = FreqEvaluator(**best_params)
         print(evaluation.evaluate())
         evaluation.simulate()

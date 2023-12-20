@@ -7,16 +7,7 @@ class GeneticAlgorithm(OptimizationAlgorithm):
         self.param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
         self.mutation_rate = mutation_rate
         self.elite_percentage = elite_percentage
-        self.bounds = np.array([
-            (0.01, 50),    # alpha1
-            (0.01, 50),    # alpha2
-            (0.01, 50),    # alpha3
-            (0.01, 50),    # alpha4
-            (0.001, 100),  # delta1
-            (0.001, 100),  # delta2
-            (0.01, 250),   # Kd
-            (1, 5)         # n
-        ])
+        self.bounds = np.array(self.bounds)
 
     def initialize_population(self):
         population = np.random.uniform(low=self.bounds[:, 0], high=self.bounds[:, 1],
@@ -65,7 +56,7 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
         return self.best_solution
 
-    def optimize_parameters(self, generations, population_size):
+    def optimize_parameters(self, population_size: int, generations: int):
         self.population_size = population_size
         self.generations = generations
         best_solution = self.evolve()

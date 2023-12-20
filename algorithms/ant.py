@@ -8,16 +8,6 @@ class AntColonyOptimization(OptimizationAlgorithm):
         self.max_iterations = max_iterations
         self.alpha = alpha
         self.rho = rho
-        self.bounds = [
-            (0.01, 50),
-            (0.01, 50),
-            (0.01, 50),
-            (0.01, 50),
-            (0.001, 100),
-            (0.001, 100),
-            (0.01, 250),
-            (1, 5)
-        ]
         self.param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
         self.num_params = len(self.bounds)
         self.elite_percentage = elite
@@ -44,7 +34,9 @@ class AntColonyOptimization(OptimizationAlgorithm):
         params_dict = dict(zip(self.param_names, params))
         return self.evaluator(*self.joined, **params_dict).evaluate()
 
-    def optimize_parameters(self):
+    def optimize_parameters(self, population_size: int, generations: int):
+        self.num_ants = population_size
+        self.max_iterations = generations
         self._initialize_pheromones()
 
         best_solution = None

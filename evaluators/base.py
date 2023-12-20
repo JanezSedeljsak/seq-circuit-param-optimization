@@ -51,7 +51,7 @@ class EvaluationBase:
         """
         raise MethodNotImplementedError()
 
-    def simulate(self, N=1000, t_end=200, out=None):
+    def simulate(self, N=1000, t_end=200, out=None, algo=''):
         """
         Simulates the model.
 
@@ -78,18 +78,21 @@ class EvaluationBase:
         Q3 = Y_reshaped[10]
         not_Q3 = Y_reshaped[11]
 
-        plt.clf() # clear plot       
-        plt.plot(T, Q1, label='q1', marker='o', markersize=3)
-        plt.plot(T, Q2, label='q2', marker='x', markersize=3)
-        plt.plot(T, Q3, label='q3', marker='*', markersize=3)
+        plt.clf() # clear plot
+        plt.style.use('ggplot')
+        if algo: plt.title(f'{algo[0].upper() + algo[1:]} - {self.__class__.__name__}')
+        plt.plot(T, Q1, label='q1', alpha=0.7)
+        plt.plot(T, Q2, label='q2', alpha=0.7)
+        plt.plot(T, Q3, label='q3', alpha=0.7)
         # plt.plot(T, not_Q1, label='not q1')
         # plt.plot(T, not_Q2, label='not q2')
 
         plt.plot(T, get_clock(T), '--', linewidth=2, label="CLK", color='black', alpha=0.25)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
-        if out is None: plt.show()
-        else: plt.savefig(out)
+        plt.show()
+        if out is not None:
+            plt.savefig(out)
 
 
     def get_params(self):

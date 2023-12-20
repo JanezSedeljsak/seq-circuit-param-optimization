@@ -9,7 +9,7 @@ class ClockEvaluator(EvaluationBase):
     @classmethod
     def single_eval(cls, Q1, Q2, Q3, C):
         # prevent horizontal convergence
-        if all(ClockEvaluator.vector_converges(q, 0.05) for q in (Q1, Q2, Q3)):
+        if all(ClockEvaluator.vector_converges(q, 0.1) for q in (Q1, Q2, Q3)):
             return -10e9
 
         return -np.sum([np.abs(Q1 - C), np.abs(Q2 - C), np.abs(Q3 - C)])
