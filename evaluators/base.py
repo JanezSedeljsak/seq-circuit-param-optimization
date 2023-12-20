@@ -38,7 +38,7 @@ class EvaluationBase:
         params_dict = self.params._asdict()
         self.params = Params(**{**params_dict, **kwargs})
 
-    def evaluate(self):
+    def evaluate(self, weights=[], joined=[]):
         """
         Evaluates the model.
         """

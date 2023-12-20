@@ -9,7 +9,7 @@ class FreqEvaluator(EvaluationBase):
     def single_eval(cls, Q1, Q2, Q3, C):
         return np.sum([cls.count_waves(Q1), cls.count_waves(Q2), cls.count_waves(Q3)])
 
-    def evaluate(self, T=np.linspace(0, 200, 1000)):
+    def evaluate(self, T=np.linspace(0, 200, 1000), **kwargs):
         """
         Search for the biggest amount of waves
         """

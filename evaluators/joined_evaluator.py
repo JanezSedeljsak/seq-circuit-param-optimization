@@ -5,11 +5,10 @@ from .models import *
 
 class JoinedEvaluator(EvaluationBase):
 
-    def __init__(self, *evaluators, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.evaluators = evaluators
 
-    def evaluate(self, T=np.linspace(0, 200, 1000)):
+    def evaluate(self, T=np.linspace(0, 200, 1000), weights=[], joined=[]):
         """
         Caclulate the mean of the standardized evaluators
         """
@@ -24,12 +23,15 @@ class JoinedEvaluator(EvaluationBase):
         C = get_clock(T)
 
         scores = []
-        for evaluator in self.evaluators:
+        if len(weights) != len(joined):
+            weights = [1] * len(joined)
+
+        for w, evaluator in zip(weights, joined):
             current_score = evaluator.single_eval(Q1, Q2, Q3, C)
             randoms_mean, randoms_std, baseline = evaluator.get_standardization()
 
             scaled_score = (current_score - randoms_mean) / (baseline - randoms_mean)
             scaled_score += scaled_score * (np.log(randoms_std + 1) / (T.shape[0]) * .5)
-            scores.append(scaled_score)
+            scores.append(scaled_score * w)
 
         return np.sum(scores)

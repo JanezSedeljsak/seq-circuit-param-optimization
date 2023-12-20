@@ -20,7 +20,7 @@ class ClockEvaluator(EvaluationBase):
         converged_values = vector[np.abs(vector - final_value) <= threshold]
         return converged_values.shape[0] >= 0.9 * len(vector)
 
-    def evaluate(self, T=np.linspace(0, 200, 1000)):
+    def evaluate(self, T=np.linspace(0, 200, 1000), **kwargs):
         """
         Search for smallest diff between the clock and the exit signals
         """

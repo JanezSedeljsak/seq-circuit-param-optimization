@@ -25,7 +25,7 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
     def _evaluate_function(self, params):
         params_dict = dict(zip(self.param_names, params))
-        return self.evaluator(*self.joined, **params_dict).evaluate()
+        return self.evaluator(**params_dict).evaluate(weights=self.weigths, joined=self.joined)
 
     def evolve(self):
         population = self.initialize_population()

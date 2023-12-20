@@ -2,7 +2,7 @@ import numpy as np
 from .base import OptimizationAlgorithm
 
 class AntColonyOptimization(OptimizationAlgorithm):
-    def __init__(self, evaluator, num_ants=20, max_iterations=200, alpha=2.5, rho=0.5, elite=0.2, joined=[]):
+    def __init__(self, evaluator, num_ants=20, max_iterations=200, alpha=2.5, rho=0.5, elite=0.2, joined=[], weights=[]):
         super().__init__(evaluator, joined=joined)
         self.num_ants = num_ants
         self.max_iterations = max_iterations
@@ -32,7 +32,7 @@ class AntColonyOptimization(OptimizationAlgorithm):
 
     def _evaluate_function(self, params):
         params_dict = dict(zip(self.param_names, params))
-        return self.evaluator(*self.joined, **params_dict).evaluate()
+        return self.evaluator(**params_dict).evaluate(weights=self.weigths, joined=self.joined)
 
     def optimize_parameters(self, population_size: int, generations: int):
         self.num_ants = population_size
