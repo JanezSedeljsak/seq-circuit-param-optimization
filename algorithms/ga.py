@@ -2,7 +2,7 @@ import numpy as np
 from .base import OptimizationAlgorithm
 
 class GeneticAlgorithm(OptimizationAlgorithm):
-    def __init__(self, evaluator, mutation_rate=0.4, elite_percentage=0.3, **kwargs):
+    def __init__(self, evaluator, mutation_rate=0.8, elite_percentage=0.2, **kwargs):
         super().__init__(evaluator, **kwargs)
         self.param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
         self.mutation_rate = mutation_rate
@@ -45,13 +45,13 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
             population = new_population
 
-            best_individual = max(enumerate(population), key=lambda x: self._evaluate_function(x[1], export_index=x[0], export=self.export_data))
-            current_eval = self._evaluate_function(best_individual[1])
+            best_individual = max(population, key=lambda x: self._evaluate_function(x, export_index=itt, export=self.export_data))
+            current_eval = self._evaluate_function(best_individual)
             if prev_best is None or current_eval > prev_best:
                 prev_best = current_eval
                 print(f'[{itt}] Update best with {current_eval:.5f}')
 
-            current_best = best_individual[1]
+            current_best = best_individual
 
         return current_best
 

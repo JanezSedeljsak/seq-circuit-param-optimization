@@ -31,4 +31,5 @@ class OptimizationAlgorithm:
 
     def do_export(self):
         if self.is_export:
-            np.savetxt(f'drawer/data/export_{self.__class__.__name__}.csv', self.export_data, delimiter=',')
+            np.savetxt(f'drawer/data/export_{self.__class__.__name__}.csv', self.export_data, 
+                       delimiter=',', fmt='%.3f')

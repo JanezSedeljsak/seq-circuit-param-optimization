@@ -30,9 +30,8 @@ class GoalEvaluator(EvaluationBase):
             return -13000
 
         current = np.array([q1, Q2[self.ixs_mask, :], Q3[self.ixs_mask, :]])
-        abs_diff = np.abs(q1_max - 100)
-        diff_scale = np.sqrt(abs_diff) if abs_diff > 1 else abs_diff
-        result = -np.sum(np.abs(self.align_matrix * q1_max - current)) * diff_scale
+        diff_scale = np.abs(q1_max - 100) * .1
+        result = -np.sum(np.abs(self.align_matrix * q1_max - current)) * max(diff_scale, 1)
         return max(result, -10000)
 
     def evaluate(self, T=np.linspace(0, 200, 1000), **kwargs):
