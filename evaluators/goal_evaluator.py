@@ -11,23 +11,29 @@ class GoalEvaluator(EvaluationBase):
             [0, 1, 1, 1, 0, 0, 0, 1],
             [0, 0, 1, 1, 1, 0, 0, 0],
             [0, 0, 0, 1, 1, 1, 0, 0]
-        ]) * 100
+        ])
         self.align_matrix = matrix.reshape(matrix.shape[0], matrix.shape[1], 1)
 
     def single_eval(self, Q1, Q2, Q3):
         # std for preventing horizontal graphs
         q1 = Q1[self.ixs_mask, :]
         if np.std(q1) < .2:
-            return -5000
+            return -15000
 
-        if q1.max() < 10:
-            return -4000
+        # max should be bigger than 10
+        q1_max = q1.max()
+        if q1_max < 10:
+            return -14000
 
+        # it should have atleast one wave
         if np.all(q1[:-1] < q1[1:]):
-            return -3000
+            return -13000
 
         current = np.array([q1, Q2[self.ixs_mask, :], Q3[self.ixs_mask, :]])
-        return -np.sum(np.abs(self.align_matrix - current))
+        abs_diff = np.abs(q1_max - 100)
+        diff_scale = np.sqrt(abs_diff) if abs_diff > 1 else abs_diff
+        result = -np.sum(np.abs(self.align_matrix * q1_max - current)) * diff_scale
+        return max(result, -10000)
 
     def evaluate(self, T=np.linspace(0, 200, 1000), **kwargs):
         """
