@@ -26,7 +26,8 @@ class EvaluationBase:
         Args:
             **kwargs: Keyword arguments to set the initial model parameters.
         """
-        self.params = Params(**kwargs)
+        self.params = Params(**kwargs) if kwargs else \
+            Params(alpha1=0, alpha2=0, alpha3=0, alpha4=0, delta1=0, delta2=0, Kd=0, n=0)
 
     def set_params(self, **kwargs):
         """
@@ -37,6 +38,9 @@ class EvaluationBase:
         """
         params_dict = self.params._asdict()
         self.params = Params(**{**params_dict, **kwargs})
+
+    def set_params_list(self, params):
+        self.params = Params._make(params)
 
     def evaluate(self, weights=[], joined=[]):
         """
@@ -50,6 +54,10 @@ class EvaluationBase:
         Should update the model parameters within the method.
         """
         raise MethodNotImplementedError()
+
+    def evaluator_export(self, Q1, Q2, Q3, export=None, export_index=-1, **kwargs):
+        if export and export_index != -1:
+            export[export_index] = np.concatenate((export[export_index], Q1.flatten(), Q2.flatten(), Q3.flatten()))
 
     def simulate(self, N=1000, t_end=200, out=None, algo=''):
         """
@@ -128,3 +136,9 @@ class EvaluationBase:
         baseline_score = cls(**dict(zip(param_names, cls.starting_point))).evaluate()
         cls.standardization = np.mean(results), np.std(results), baseline_score
         return cls.standardization
+
+    @staticmethod
+    def vector_converges(vector, threshold):
+        final_value = vector[-1]
+        converged_values = vector[np.abs(vector - final_value) <= threshold]
+        return converged_values.shape[0] >= 0.8 * len(vector)

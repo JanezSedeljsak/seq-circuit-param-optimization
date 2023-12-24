@@ -7,14 +7,14 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
     The Whale optimization algorithm implementation.
     """
 
-    def __init__(self, evaluator):
+    def __init__(self, evaluator, **kwargs):
         """
         Constructs a new WhaleOptimizationAlgorithm instance.
 
         Args:
             evaluator: The fitness function provider.
         """
-        super().__init__(evaluator)
+        super().__init__(evaluator, **kwargs)
         # Set seed for reproducibility
         # np.random.seed(42)
         # np.random.seed(444)
@@ -37,7 +37,7 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
                                  high=np.array([bound[1] for bound in self.bounds]),
                                  size=(population_size, len(self.bounds)))
 
-    def _evaluate_function(self, params):
+    def _evaluate_function(self, params, **kwargs):
         """
         Evaluates the current parameters.
 
@@ -58,7 +58,8 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
             'n': params[7]
         }
 
-        evaluation = self.evaluator(**params_dict).evaluate()
+        self.evaluator.set_params(**params_dict)
+        evaluation = self.evaluator.evaluate(**kwargs)
         return -evaluation
 
     def _update_position(self, current_position, leader_position, A):
@@ -96,11 +97,12 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
             The optimized parameters packed in a dictionary.
         """
         population = self._initialize_population(population_size)
+        self.create_export_matrix(generations)
         convergence_curve = []
 
         for generation in range(1, generations + 1):
             print(f"Generation {generation}/{generations}")
-            leader_position = population[np.argmin([self._evaluate_function(w) for w in population])]
+            leader_position = population[np.argmin([self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])]
 
             for i in range(population_size):
                 a = 2 - 2 * generation / generations  # linearly decreases from 2 to 0
@@ -124,4 +126,5 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
             'Kd': best_params[6],
             'n': best_params[7]
         }
+        self.do_export()
         return best_params_dict

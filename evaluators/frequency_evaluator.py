@@ -21,6 +21,8 @@ class FreqEvaluator(EvaluationBase):
         Q1 = Y_reshaped[2]
         Q2 = Y_reshaped[6]
         Q3 = Y_reshaped[10]
+
+        self.evaluator_export(Q1, Q2, Q3, **kwargs)
         return self.single_eval(Q1, Q2, Q3, None)
 
     @classmethod

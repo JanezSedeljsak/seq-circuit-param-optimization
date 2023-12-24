@@ -8,7 +8,7 @@ class JoinedEvaluator(EvaluationBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def evaluate(self, T=np.linspace(0, 200, 1000), weights=[], joined=[]):
+    def evaluate(self, T=np.linspace(0, 200, 1000), weights=[], joined=[], **kwargs):
         """
         Caclulate the mean of the standardized evaluators
         """
@@ -34,4 +34,5 @@ class JoinedEvaluator(EvaluationBase):
             scaled_score += scaled_score * (np.log(randoms_std + 1) / (T.shape[0]) * .5)
             scores.append(scaled_score * w)
 
+        self.evaluator_export(Q1, Q2, Q3, **kwargs)
         return np.sum(scores)

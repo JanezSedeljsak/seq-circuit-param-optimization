@@ -7,14 +7,14 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
     The Grey Wolf optimization algorithm implementation.
     """
 
-    def __init__(self, evaluator):
+    def __init__(self, evaluator, **kwargs):
         """
         Constructs a new GreyWolfOptimizer instance.
 
         Args:
             evaluator: The fitness function provider.
         """
-        super().__init__(evaluator)
+        super().__init__(evaluator, **kwargs)
         # np.random.seed(42)
 
     def _initialize_population(self, population_size):
@@ -55,7 +55,7 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
 
         return np.clip(new_position, self.bounds[0][0], self.bounds[0][1])
 
-    def _evaluate_function(self, params):
+    def _evaluate_function(self, params, **kwrags):
         """
         Evaluates the current parameters.
 
@@ -76,7 +76,8 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
             'n': params[7]
         }
 
-        evaluation = self.evaluator(**params_dict).evaluate()
+        self.evaluator.set_params(**params_dict)
+        evaluation = self.evaluator.evaluate(**kwrags)
         return -evaluation
 
     def optimize_parameters(self, population_size: int, generations: int):
@@ -91,11 +92,12 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
             The optimized parameters packed in a dictionary.
         """
         population = self._initialize_population(population_size)
+        self.create_export_matrix(generations)
         convergence_curve = []
 
         for generation in range(1, generations + 1):
             print(f"Generation {generation}/{generations}")
-            sorted_indices = np.argsort([self._evaluate_function(w) for w in population])
+            sorted_indices = np.argsort([self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])
             alpha, beta, delta = population[sorted_indices[:3]]
 
             for i in range(population_size):
@@ -117,4 +119,5 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
             'Kd': best_params[6],
             'n': best_params[7]
         }
+        self.do_export()
         return best_params_dict

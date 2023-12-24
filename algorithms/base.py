@@ -1,9 +1,11 @@
+import numpy as np
+
 class OptimizationAlgorithm:
-    def __init__(self, evaluator, joined=[], weights=[]):
-        self.starting_point = [34.73, 49.36, 32.73, 49.54, 1.93, 0.69, 10.44, 4.35]
-        self.current_solution = self.starting_point
-        self.best_solution = self.starting_point
-        self.evaluator = evaluator
+
+    def __init__(self, evaluator, joined=[], weights=[], is_export=False):
+        self.export_data = None
+        self.is_export = is_export
+        self.evaluator = evaluator()
         self.joined = joined
         self.weigths = weights
         self.bounds = [
@@ -17,8 +19,16 @@ class OptimizationAlgorithm:
             (1, 5)         # n
         ]
 
-    def _evaluate_function(self, params):
+    def _evaluate_function(self, params, **kwargs):
         return self.evaluator.evaluate(params)
 
     def optimize_parameters(self):
         raise NotImplementedError("Subclasses must implement optimize_parameters method.")
+    
+    def create_export_matrix(self, n):
+        if self.is_export:
+            self.export_data = [np.ones((0))] * n
+
+    def do_export(self):
+        if self.is_export:
+            np.savetxt(f'drawer/data/export_{self.__class__.__name__}.csv', self.export_data, delimiter=',')
