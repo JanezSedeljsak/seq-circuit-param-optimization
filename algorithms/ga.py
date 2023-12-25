@@ -1,8 +1,9 @@
 import numpy as np
+from pyDOE import lhs
 from .base import OptimizationAlgorithm
 
 class GeneticAlgorithm(OptimizationAlgorithm):
-    def __init__(self, evaluator, mutation_rate=0.8, elite_percentage=0.2, **kwargs):
+    def __init__(self, evaluator, mutation_rate=0.35, elite_percentage=0.2, **kwargs):
         super().__init__(evaluator, **kwargs)
         self.param_names = ['alpha1', 'alpha2', 'alpha3', 'alpha4', 'delta1', 'delta2', 'Kd', 'n']
         self.mutation_rate = mutation_rate
@@ -10,8 +11,16 @@ class GeneticAlgorithm(OptimizationAlgorithm):
         self.bounds = np.array(self.bounds)
 
     def initialize_population(self):
-        return np.random.uniform(low=self.bounds[:, 0], high=self.bounds[:, 1],
-                                       size=(self.population_size, len(self.param_names)))
+        num_samples = self.population_size * 20  # Make the base population 100 times larger
+        lhd = lhs(len(self.bounds), samples=num_samples, criterion='center')
+        scaled_samples = np.zeros_like(lhd)
+
+        for i in range(len(self.bounds)):
+            scaled_samples[:, i] = lhd[:, i] * (self.bounds[i][1] - self.bounds[i][0]) + self.bounds[i][0]
+
+        fitness = np.array([-self._evaluate_function(params) for params in scaled_samples])
+        sorted_indices = np.argsort(fitness)
+        return scaled_samples[sorted_indices[:self.population_size]]
 
     def _mutate(self, individual):
         mask = np.random.rand(*individual.shape) < self.mutation_rate
@@ -22,12 +31,11 @@ class GeneticAlgorithm(OptimizationAlgorithm):
         return individual
 
     def _evaluate_function(self, params, **kwargs):
-        params_dict = dict(zip(self.param_names, params))
-        self.evaluator.set_params(**params_dict)
+        self.evaluator.set_params_list(params)
         return self.evaluator.evaluate(weights=self.weigths, joined=self.joined, **kwargs)
 
-    def evolve(self):
-        population = self.initialize_population()
+    def evolve(self, base_population):
+        population = self.initialize_population() if base_population is None else base_population
         elite_count = int(self.elite_percentage * len(population))
         prev_best, current_best = None, None
 
@@ -55,10 +63,10 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
         return current_best
 
-    def optimize_parameters(self, population_size: int, generations: int):
+    def optimize_parameters(self, population_size: int, generations: int, base_population=None):
         self.population_size = population_size
         self.generations = generations
         self.create_export_matrix(generations)
-        best_solution = self.evolve()
+        best_solution = self.evolve(base_population)
         self.do_export()
         return dict(zip(self.param_names, best_solution))
