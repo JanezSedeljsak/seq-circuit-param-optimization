@@ -3,15 +3,16 @@ mod util;
 mod constants;
 
 use constants::*;
+use util::interpolate;
 use std::path::Path;
 use nannou::prelude::*;
 use nannou::color::rgba;
 
 
 struct State {
-    graphs: Box<[[[[f32; LINE_PERCISION]; 3]; POPULATION]; GENERATIONS]>,
-    transition: Box<[[[f32; LINE_PERCISION]; 3]; POPULATION]>,
-    clk: [f32; LINE_PERCISION],
+    graphs: Box<[[[[f32; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]>,
+    transition: Box<[[[f32; LINE_PRECISION]; 3]; POPULATION]>,
+    clk: [f32; LINE_PRECISION],
     transition_index: usize,
     generation_index: usize,
     best_index: i32,
@@ -30,11 +31,11 @@ fn main() {
 fn initialize(_app: &App) -> State {
     _app.main_window().set_title("Optimization visualizer");
     let file_path = Path::new(DATA_FILE);
-    let transition = Box::new([[[0.0; LINE_PERCISION]; 3]; POPULATION]);
+    let transition = Box::new([[[0.0; LINE_PRECISION]; 3]; POPULATION]);
     let transition_index = 0;
     let generation_index = 0;
     let best_index = -1;
-    let mut graphs = Box::new([[[[0.0; LINE_PERCISION]; 3]; POPULATION]; GENERATIONS]);
+    let mut graphs = Box::new([[[[0.0; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]);
 
     if let Ok(lines) = util::read_lines(file_path) {
         for (idx, line) in lines.enumerate() {
@@ -47,7 +48,7 @@ fn initialize(_app: &App) -> State {
     }
 
     let max_value = 150.0;
-    let mut clk = [0.0; LINE_PERCISION];
+    let mut clk = [0.0; LINE_PRECISION];
     if let Err(err) = util::load_clk(&mut clk) {
         println!("Error: {}", err);
     }
@@ -114,7 +115,7 @@ fn view(_app: &App, state: &State, frame: Frame) {
     let cell_width = _app.window_rect().w() / NUM_COLS as f32;
     let cell_height = _app.window_rect().h() / NUM_ROWS as f32;
 
-    let x_scale = (cell_width - 10.0) / LINE_PERCISION as f32;
+    let x_scale = (cell_width - 10.0) / LINE_PRECISION as f32;
     let y_scale = (cell_height - 10.0) / state.max_value;
 
     for row in 0..NUM_ROWS {
@@ -140,7 +141,7 @@ fn view(_app: &App, state: &State, frame: Frame) {
                 .font_size(15);
 
             // draw CLK
-            let points = (0..LINE_PERCISION).map(|i| {
+            let points = (0..LINE_PRECISION).map(|i| {
                 let x_itt = i as f32 * x_scale + horizontal_offset;
                 let y_itt = state.clk[i] * y_scale + vertical_offset;
                 (pt2(x_itt, y_itt), rgba(0.35, 0.35, 0.35, 0.2))
@@ -149,7 +150,7 @@ fn view(_app: &App, state: &State, frame: Frame) {
             
             // draw Q1, Q2, Q3
             for j in 0..3 {
-                let points = (0..LINE_PERCISION).map(|i| {
+                let points = (0..LINE_PRECISION).map(|i| {
                     let x_itt = i as f32 * x_scale + horizontal_offset;
                     let mut y_itt = state.graphs[state.generation_index][graph_index][j][i];
                     if !y_itt.is_finite() {
@@ -157,7 +158,9 @@ fn view(_app: &App, state: &State, frame: Frame) {
                     }
                     
                     let delta = state.transition[graph_index][j][i];
-                    y_itt += (if delta.is_finite() { delta } else { 0.0 }) * state.transition_index as f32;
+                    if delta.is_finite() {
+                        y_itt = interpolate(y_itt, delta, state.transition_index) 
+                    }
                     if y_itt < 0.0 {
                         y_itt = 0.0;
                     }

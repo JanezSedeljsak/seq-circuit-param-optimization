@@ -13,7 +13,7 @@ where
 }
 
 pub fn parse_generation(
-    input: &str, graphs: &mut Box<[[[[f32; LINE_PERCISION]; 3]; POPULATION]; GENERATIONS]>, 
+    input: &str, graphs: &mut Box<[[[[f32; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]>, 
     index: usize
 ) -> Result<(), Box<dyn Error>> {
     if index < GENERATIONS {
@@ -35,7 +35,7 @@ pub fn parse_generation(
                 })
                 .collect();
             
-            for (i, chunk) in minified_individual.chunks(LINE_PERCISION).enumerate().take(3) {
+            for (i, chunk) in minified_individual.chunks(LINE_PRECISION).enumerate().take(3) {
                 graphs[index][itt][i].copy_from_slice(chunk);
             }
         }
@@ -47,22 +47,22 @@ pub fn parse_generation(
 }
 
 pub fn fill_transition(
-    transition: &mut [[f32; LINE_PERCISION]; 3], start: &[[f32; LINE_PERCISION]; 3], 
-    end: &[[f32; LINE_PERCISION]; 3], transitions_count: usize
+    transition: &mut [[f32; LINE_PRECISION]; 3], start: &[[f32; LINE_PRECISION]; 3], 
+    end: &[[f32; LINE_PRECISION]; 3], transitions_count: usize
 ) {
     for j in 0..3 {
-        for i in 0..LINE_PERCISION {
+        for i in 0..LINE_PRECISION {
             let diff = end[j][i] - start[j][i];
             transition[j][i] = diff / transitions_count as f32;
         }
     }
 }
 
-pub fn reset_transition(transition: &mut [[[f32; LINE_PERCISION]; 3]; POPULATION])
+pub fn reset_transition(transition: &mut [[[f32; LINE_PRECISION]; 3]; POPULATION])
 {
     for i in 0..POPULATION {
         for j in 0..3 {
-            for k in 0..LINE_PERCISION {
+            for k in 0..LINE_PRECISION {
                 transition[i][j][k] = 0.0;
             }
         }
@@ -70,7 +70,7 @@ pub fn reset_transition(transition: &mut [[[f32; LINE_PERCISION]; 3]; POPULATION
 }
 
 
-pub fn load_clk(clk: &mut [f32; LINE_PERCISION]) -> Result<(), Box<dyn Error>> {
+pub fn load_clk(clk: &mut [f32; LINE_PRECISION]) -> Result<(), Box<dyn Error>> {
     let mut unparsed_clk: [f32; 1000] = [0.0; 1000];
     if let Ok(lines) = read_lines(CLK_FILE) {
         for (idx, line) in lines.enumerate() {
@@ -92,10 +92,20 @@ pub fn load_clk(clk: &mut [f32; LINE_PERCISION]) -> Result<(), Box<dyn Error>> {
         })
         .collect();
     
-    for i in 0..LINE_PERCISION {
+    for i in 0..LINE_PRECISION {
         clk[i] = clk_minified[i];
     }
 
     Ok(())
 }
 
+fn octic_ease(t: f32) -> f32 {
+    t * t * t * t * (t * (t * (t * (-20.0 * t + 70.0) - 84.0) + 35.0))
+}
+
+pub fn interpolate(y_base: f32, delta: f32, transition_index: usize) -> f32 {
+    let full_delta = delta * TRANSITION_COUNT as f32;
+    let t = transition_index as f32 / TRANSITION_COUNT as f32;
+    let eased_t = octic_ease(t);
+    y_base + full_delta * eased_t
+}
