@@ -19,14 +19,15 @@ struct State {
 }
 
 fn main() {
-    nannou::app(state)
+    nannou::app(initialize)
         .update(update)
         .simple_window(view)
+        .event(event)
         .size(1280, 560)
         .run();
 }
 
-fn state(_app: &App) -> State {
+fn initialize(_app: &App) -> State {
     _app.main_window().set_title("Optimization visualizer");
     let file_path = Path::new(DATA_FILE);
     let transition = Box::new([[[0.0; LINE_PERCISION]; 3]; POPULATION]);
@@ -52,6 +53,27 @@ fn state(_app: &App) -> State {
     }
 
     State { graphs, transition, clk, transition_index, generation_index, best_index, max_value }
+}
+
+fn reset_state(_app: &App, state: &mut State) {
+    let new_state = initialize(_app);
+    state.graphs = new_state.graphs;
+    state.transition = new_state.transition;
+    state.clk = new_state.clk;
+    state.transition_index = new_state.transition_index;
+    state.generation_index = new_state.generation_index;
+    state.best_index = new_state.best_index;
+    state.max_value = new_state.max_value;
+}
+
+fn event(_app: &App, state: &mut State, event: Event) {
+    if let Event::WindowEvent { simple: Some(input), .. } = event {
+        if let KeyPressed(key) = input {
+            if key == Key::R {
+                reset_state(_app, state);
+            }
+        }
+    }
 }
 
 fn update(_app: &App, state: &mut State, _update: Update) {
