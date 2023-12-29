@@ -52,10 +52,10 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
         d_delta = np.abs(c3 * delta - current_position)
 
         new_position = alpha - a1 * d_alpha - a2 * d_beta - a3 * d_delta
+        np.clip(new_position, self.bounds[:, 0], self.bounds[:, 1], out=new_position)
+        return new_position
 
-        return np.clip(new_position, self.bounds[0][0], self.bounds[0][1])
-
-    def _evaluate_function(self, params, **kwrags):
+    def _evaluate_function(self, params, **kwargs):
         """
         Evaluates the current parameters.
 
@@ -65,20 +65,9 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
         Returns:
             The fitness of parameters.
         """
-        params_dict = {
-            'alpha1': params[0],
-            'alpha2': params[1],
-            'alpha3': params[2],
-            'alpha4': params[3],
-            'delta1': params[4],
-            'delta2': params[5],
-            'Kd': params[6],
-            'n': params[7]
-        }
-
-        self.evaluator.set_params(**params_dict)
-        evaluation = self.evaluator.evaluate(**kwrags)
-        return -evaluation
+        self.evaluator.set_params_list(params)
+        evaluation = self.evaluator.evaluate(**kwargs)
+        return evaluation
 
     def optimize_parameters(self, population_size: int, generations: int):
         """
@@ -94,21 +83,26 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
         population = self._initialize_population(population_size)
         self.create_export_matrix(generations)
         convergence_curve = []
+        best_params = None
 
         for generation in range(1, generations + 1):
-            print(f"Generation {generation}/{generations}")
-            sorted_indices = np.argsort([self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])
+            self.do_print(f"Generation {generation}/{generations}")
+            sorted_indices = np.argsort([-self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])
             alpha, beta, delta = population[sorted_indices[:3]]
+
+            current_eval = -self._evaluate_function(alpha)
+            convergence_curve.append(current_eval)
+            self.do_print(f"Best Fitness: {current_eval}")
+            if best_params is None or current_eval < -self._evaluate_function(best_params):
+                best_params = alpha
 
             for i in range(population_size):
                 population[i] = self._update_position(population[i], alpha, beta, delta)
 
-            convergence_curve.append(self._evaluate_function(alpha))
-            print(f"Best Fitness: {convergence_curve[-1]}")
 
-        best_params = population[np.argmin([self._evaluate_function(w) for w in population])]
-        best_fitness = convergence_curve[-1] if len(convergence_curve) > 0 else np.inf
-        print(f"Best Fitness: {best_fitness}")
+
+        best_fitness = -self._evaluate_function(best_params)
+        self.do_print(f"Best Fitness: {best_fitness}")
         best_params_dict = {
             'alpha1': best_params[0],
             'alpha2': best_params[1],

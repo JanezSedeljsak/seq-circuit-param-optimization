@@ -2,13 +2,14 @@ import numpy as np
 
 class OptimizationAlgorithm:
 
-    def __init__(self, evaluator, joined=[], weights=[], is_export=False):
+    def __init__(self, evaluator, joined=[], weights=[], is_export=False, is_print=True, **kwargs):
         self.export_data = None
         self.is_export = is_export
         self.evaluator = evaluator()
         self.joined = joined
         self.weigths = weights
-        self.bounds = [
+        self.do_print = print if is_print else lambda x: None
+        self.bounds = np.array([
             (0.01, 50),    # alpha1
             (0.01, 50),    # alpha2
             (0.01, 50),    # alpha3
@@ -17,7 +18,7 @@ class OptimizationAlgorithm:
             (0.001, 100),  # delta2
             (0.01, 250),   # Kd
             (1, 5)         # n
-        ]
+        ])
 
     def _evaluate_function(self, params, **kwargs):
         return self.evaluator.evaluate(params)

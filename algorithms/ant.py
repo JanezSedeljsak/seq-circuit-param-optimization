@@ -45,7 +45,7 @@ class AntColonyOptimization(OptimizationAlgorithm):
             if np.max(ant_scores) > best_score:
                 best_solution = ant_solutions[np.argmax(ant_scores)]
                 best_score = np.max(ant_scores)
-                print(f'[{itt}] Update best with {best_score:.5f}')
+                self.do_print(f'[{itt}] Update best with {best_score:.5f}')
 
             elite_indices = np.argsort(ant_scores)[-self.num_elite:]
             elite_solutions = ant_solutions[elite_indices]

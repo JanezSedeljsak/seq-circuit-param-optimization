@@ -6,7 +6,7 @@ from .models import three_bit_model, get_clock
 class GoalEvaluator(EvaluationBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.ixs_mask = np.arange(50, 1000, 120)
+        self.ixs_mask = np.arange(65, 1000, 120)
         matrix = np.array([
             [0, 1, 1, 1, 0, 0, 0, 1],
             [0, 0, 1, 1, 1, 0, 0, 0],
@@ -17,22 +17,22 @@ class GoalEvaluator(EvaluationBase):
     def single_eval(self, Q1, Q2, Q3):
         # std for preventing horizontal graphs
         q1 = Q1[self.ixs_mask, :]
-        if np.std(q1) < .2:
-            return -15000
+        if np.std(q1) < .2 or np.std(q1[300:]) < .1:
+            return -1_500_000
 
         # max should be bigger than 10
         q1_max = q1.max()
         if q1_max < 10:
-            return -14000
+            return -1_400_000
 
         # it should have atleast one wave
         if np.all(q1[:-1] < q1[1:]):
-            return -13000
+            return -1_300_000
 
         current = np.array([q1, Q2[self.ixs_mask, :], Q3[self.ixs_mask, :]])
-        diff_scale = np.abs(q1_max - 100) * .1
+        diff_scale = np.abs(q1_max - 100) ** 2
         result = -np.sum(np.abs(self.align_matrix * q1_max - current)) * max(diff_scale, 1)
-        return max(result, -10000)
+        return max(result, -1_000_000)
 
     def evaluate(self, T=np.linspace(0, 200, 1000), **kwargs):
         """
