@@ -47,7 +47,7 @@ fn initialize(_app: &App) -> State {
         }
     }
 
-    let max_value = 150.0;
+    let max_value = 200.0;
     let mut clk = [0.0; LINE_PRECISION];
     if let Err(err) = util::load_clk(&mut clk) {
         println!("Error: {}", err);
@@ -109,8 +109,14 @@ fn update(_app: &App, state: &mut State, _update: Update) {
 }
 
 fn view(_app: &App, state: &State, frame: Frame) {
+    let back_color: Rgba = rgba(0.1, 0.1, 0.13, 1.0);
+    let q1_color: Rgba = rgba(1.0, 0.5, 0.3, 1.0);
+    let q2_color: Rgba = rgba(0.95, 0.8, 0.2, 1.0);
+    let q3_color: Rgba = rgba(0.15, 0.8, 0.9, 1.0);
+    let colors: [Rgba; 3] = [q1_color, q2_color, q3_color];
+
     let draw = _app.draw();
-    draw.background().color(BLACK);
+    draw.background().color(back_color);
   
     let cell_width = _app.window_rect().w() / NUM_COLS as f32;
     let cell_height = _app.window_rect().h() / NUM_ROWS as f32;
@@ -125,11 +131,10 @@ fn view(_app: &App, state: &State, frame: Frame) {
             let x = col as f32 * cell_width - _app.window_rect().w() / 2.0 + cell_width / 2.0;
             let y = row as f32 * cell_height - _app.window_rect().h() / 2.0 + cell_height / 2.0;
             let rect = Rect::from_x_y_w_h(x, y, cell_width, cell_height);
-            draw.rect().xy(rect.xy()).wh(rect.wh()).color(BLACK).stroke(DARKGRAY).stroke_weight(2.0);
+            draw.rect().xy(rect.xy()).wh(rect.wh()).color(back_color).stroke(DARKGRAY).stroke_weight(2.0);
             
             let horizontal_offset = x - cell_width / 2.0 + 5.0;
             let vertical_offset = y - cell_height / 2.0 + 5.0;
-            let colors = [RED, BLUE, GREEN];
 
             let text = format!("Graph {}", graph_index);
             let text_position = pt2(x - cell_width / 2.0 + 40.0, y + cell_height / 2.0 - 15.0);
@@ -178,9 +183,9 @@ fn view(_app: &App, state: &State, frame: Frame) {
     let gen_label: &str = &format!("Generation: {}/{}", state.generation_index + 1, GENERATIONS);
 
     draw.rect().xy(rect.xy()).wh(rect.wh()).color(legend_color);
-    draw.text("Q1").xy(pt2(_app.window_rect().w() / 2.0 - 130.0, _app.window_rect().h() / 2.0 - 10.0)).color(RED).font_size(15);
-    draw.text("Q2").xy(pt2(_app.window_rect().w() / 2.0 - 80.0, _app.window_rect().h() / 2.0 - 10.0)).color(BLUE).font_size(15);
-    draw.text("Q3").xy(pt2(_app.window_rect().w() / 2.0 - 30.0, _app.window_rect().h() / 2.0 - 10.0)).color(GREEN).font_size(15);
+    draw.text("Q1").xy(pt2(_app.window_rect().w() / 2.0 - 130.0, _app.window_rect().h() / 2.0 - 10.0)).color(q1_color).font_size(15);
+    draw.text("Q2").xy(pt2(_app.window_rect().w() / 2.0 - 80.0, _app.window_rect().h() / 2.0 - 10.0)).color(q2_color).font_size(15);
+    draw.text("Q3").xy(pt2(_app.window_rect().w() / 2.0 - 30.0, _app.window_rect().h() / 2.0 - 10.0)).color(q3_color).font_size(15);
     draw.text(gen_label).xy(pt2(_app.window_rect().w() / 2.0 - 75.0, _app.window_rect().h() / 2.0 - 35.0)).color(WHITE).font_size(15);
     
     draw.to_frame(_app, &frame).unwrap();
