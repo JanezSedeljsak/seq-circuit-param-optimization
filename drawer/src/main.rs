@@ -10,7 +10,7 @@ use nannou::color::rgba;
 
 
 struct State {
-    graphs: Box<[[[[f32; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]>,
+    graphs: Vec<Vec<Vec<Vec<f32>>>>,
     transition: Box<[[[f32; LINE_PRECISION]; 3]; POPULATION]>,
     clk: [f32; LINE_PRECISION],
     transition_index: usize,
@@ -35,7 +35,7 @@ fn initialize(_app: &App) -> State {
     let transition_index = 0;
     let generation_index = 0;
     let best_index = -1;
-    let mut graphs = Box::new([[[[0.0; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]);
+    let mut graphs: Vec<Vec<Vec<Vec<f32>>>> = vec![vec![vec![vec![0.0; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS];
 
     if let Ok(lines) = util::read_lines(file_path) {
         for (idx, line) in lines.enumerate() {
@@ -175,12 +175,14 @@ fn view(_app: &App, state: &State, frame: Frame) {
 
     let legend_color = rgba(0.35, 0.35, 0.35, 0.3);
     let rect = Rect::from_x_y_w_h(_app.window_rect().w() / 2.0, _app.window_rect().h() / 2.0, 300.0, 50.0);
-    
+    let gen_label: &str = &format!("Generation: {}/{}", state.generation_index + 1, GENERATIONS);
+
     draw.rect().xy(rect.xy()).wh(rect.wh()).color(legend_color);
     draw.text("Q1").xy(pt2(_app.window_rect().w() / 2.0 - 130.0, _app.window_rect().h() / 2.0 - 10.0)).color(RED).font_size(15);
     draw.text("Q2").xy(pt2(_app.window_rect().w() / 2.0 - 80.0, _app.window_rect().h() / 2.0 - 10.0)).color(BLUE).font_size(15);
     draw.text("Q3").xy(pt2(_app.window_rect().w() / 2.0 - 30.0, _app.window_rect().h() / 2.0 - 10.0)).color(GREEN).font_size(15);
-
+    draw.text(gen_label).xy(pt2(_app.window_rect().w() / 2.0 - 75.0, _app.window_rect().h() / 2.0 - 35.0)).color(WHITE).font_size(15);
+    
     draw.to_frame(_app, &frame).unwrap();
 }
 

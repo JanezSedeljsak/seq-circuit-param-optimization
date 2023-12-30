@@ -86,15 +86,14 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
         best_params = None
 
         for generation in range(1, generations + 1):
-            self.do_print(f"Generation {generation}/{generations}")
             sorted_indices = np.argsort([-self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])
             alpha, beta, delta = population[sorted_indices[:3]]
 
             current_eval = -self._evaluate_function(alpha)
             convergence_curve.append(current_eval)
-            self.do_print(f"Best Fitness: {current_eval}")
             if best_params is None or current_eval < -self._evaluate_function(best_params):
-                best_params = alpha
+                self.do_print(f"[{generation}] Best Fitness: {current_eval}")
+                best_params = alpha.copy()
 
             for i in range(population_size):
                 population[i] = self._update_position(population[i], alpha, beta, delta)

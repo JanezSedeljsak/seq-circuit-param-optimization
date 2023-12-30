@@ -49,8 +49,7 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
             The fitness of parameters.
         """
         self.evaluator.set_params_list(params)
-        evaluation = self.evaluator.evaluate(**kwargs)
-        return evaluation
+        return self.evaluator.evaluate(**kwargs)
 
     def _update_position(self, current_position, leader_position, A):
         """
@@ -95,14 +94,13 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
         best_params = None
 
         for generation in range(1, generations + 1):
-            self.do_print(f"Generation {generation}/{generations}")
             leader_position = population[np.argmin([-self._evaluate_function(w, export_index=generation - 1, export=self.export_data) for w in population])]
 
             current_eval = -self._evaluate_function(leader_position)
             convergence_curve.append(current_eval)
-            self.do_print(f"Best Fitness: {current_eval}")
             if best_params is None or current_eval < -self._evaluate_function(best_params):
-                best_params = leader_position
+                self.do_print(f"[{generation}] Best Fitness: {current_eval}")
+                best_params = leader_position.copy()
 
             for i in range(population_size):
                 a = 2 - 2 * generation / generations  # linearly decreases from 2 to 0

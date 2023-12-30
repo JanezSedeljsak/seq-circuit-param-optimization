@@ -13,7 +13,7 @@ where
 }
 
 pub fn parse_generation(
-    input: &str, graphs: &mut Box<[[[[f32; LINE_PRECISION]; 3]; POPULATION]; GENERATIONS]>, 
+    input: &str, graphs: &mut Vec<Vec<Vec<Vec<f32>>>>, 
     index: usize
 ) -> Result<(), Box<dyn Error>> {
     if index < GENERATIONS {
@@ -47,8 +47,8 @@ pub fn parse_generation(
 }
 
 pub fn fill_transition(
-    transition: &mut [[f32; LINE_PRECISION]; 3], start: &[[f32; LINE_PRECISION]; 3], 
-    end: &[[f32; LINE_PRECISION]; 3], transitions_count: usize
+    transition: &mut [[f32; LINE_PRECISION]; 3], start: &Vec<Vec<f32>>, 
+    end: &Vec<Vec<f32>>, transitions_count: usize
 ) {
     for j in 0..3 {
         for i in 0..LINE_PRECISION {
