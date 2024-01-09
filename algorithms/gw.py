@@ -69,7 +69,7 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
         evaluation = self.evaluator.evaluate(**kwargs)
         return evaluation
 
-    def optimize_parameters(self, population_size: int, generations: int):
+    def optimize_parameters(self, population_size: int, generations: int, top: int = None):
         """
         Optimizes the parameters.
 
@@ -95,6 +95,8 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
                 self.do_print(f"[{generation}] Best Fitness: {current_eval}")
                 best_params = alpha.copy()
 
+            self.generations_evaluations[generation] = current_eval
+
             for i in range(population_size):
                 population[i] = self._update_position(population[i], alpha, beta, delta)
 
@@ -112,5 +114,5 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
             'Kd': best_params[6],
             'n': best_params[7]
         }
-        self.do_export()
+        self.do_export(top)
         return best_params_dict

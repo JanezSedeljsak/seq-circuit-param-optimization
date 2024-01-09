@@ -52,12 +52,14 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
             current_best = best_individual
 
+            self.generations_evaluations[itt] = current_eval
+
         return current_best
 
-    def optimize_parameters(self, population_size: int, generations: int, base_population=None):
+    def optimize_parameters(self, population_size: int, generations: int, base_population=None, top=None):
         self.population_size = population_size
         self.generations = generations
         self.create_export_matrix(generations)
         best_solution = self.evolve(base_population)
-        self.do_export()
+        self.do_export(top)
         return dict(zip(self.param_names, best_solution))

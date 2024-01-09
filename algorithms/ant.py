@@ -29,7 +29,7 @@ class AntColonyOptimization(OptimizationAlgorithm):
         self.evaluator.set_params_list(params)
         return self.evaluator.evaluate(weights=self.weigths, joined=self.joined, **kwargs)
 
-    def optimize_parameters(self, population_size: int, generations: int):
+    def optimize_parameters(self, population_size: int, generations: int, top=None):
         self.num_ants = population_size
         self.max_iterations = generations
         self._initialize_pheromones()
@@ -47,6 +47,8 @@ class AntColonyOptimization(OptimizationAlgorithm):
                 best_score = np.max(ant_scores)
                 self.do_print(f'[{itt}] Update best with {best_score:.5f}')
 
+            self.generations_evaluations[itt] = best_solution
+
             elite_indices = np.argsort(ant_scores)[-self.num_elite:]
             elite_solutions = ant_solutions[elite_indices]
             elite_scores = ant_scores[elite_indices]
@@ -54,5 +56,5 @@ class AntColonyOptimization(OptimizationAlgorithm):
             self._update_pheromones(ant_solutions, ant_scores)
             self._update_pheromones(elite_solutions, elite_scores)
 
-        self.do_export()
+        self.do_export(top)
         return dict(zip(self.param_names, best_solution))

@@ -77,7 +77,7 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
         np.clip(new_position, self.bounds[:, 0], self.bounds[:, 1], out=new_position)
         return new_position
 
-    def optimize_parameters(self, population_size: int, generations: int):
+    def optimize_parameters(self, population_size: int, generations: int, top=None):
         """
         Optimizes the parameters.
 
@@ -102,6 +102,8 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
                 self.do_print(f"[{generation}] Best Fitness: {current_eval}")
                 best_params = leader_position.copy()
 
+            self.generations_evaluations[generation] = current_eval
+
             for i in range(population_size):
                 a = 2 - 2 * generation / generations  # linearly decreases from 2 to 0
                 A = 2 * a * np.random.rand() - a
@@ -120,5 +122,5 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
             'Kd': best_params[6],
             'n': best_params[7]
         }
-        self.do_export()
+        self.do_export(top)
         return best_params_dict
