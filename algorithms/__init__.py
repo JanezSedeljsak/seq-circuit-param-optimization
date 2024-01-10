@@ -4,6 +4,7 @@ from .gw import GreyWolfOptimizer
 from .woa import WhaleOptimizationAlgorithm
 from .multip import MultiOptimizer
 from .hyper_search import HyperSearch
+from .local_optimizer import LocalOptimizer
 
 __all__ = [
     'GeneticAlgorithm',
@@ -11,5 +12,6 @@ __all__ = [
     'GreyWolfOptimizer',
     'WhaleOptimizationAlgorithm',
     'HyperSearch',
-    'MultiOptimizer'
+    'MultiOptimizer',
+    'LocalOptimizer'
 ]
