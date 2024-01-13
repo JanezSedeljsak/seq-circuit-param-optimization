@@ -102,7 +102,10 @@ class WhaleOptimizationAlgorithm(OptimizationAlgorithm):
                 self.do_print(f"[{generation}] Best Fitness: {current_eval}")
                 best_params = leader_position.copy()
 
-            self.generations_evaluations[generation] = current_eval
+            if len(self.generations_evaluations) == 0:
+                self.generations_evaluations[generation] = current_eval
+            else:
+                self.generations_evaluations[generation] = current_eval if current_eval < min(self.generations_evaluations.values()) else min(self.generations_evaluations.values())
 
             for i in range(population_size):
                 a = 2 - 2 * generation / generations  # linearly decreases from 2 to 0

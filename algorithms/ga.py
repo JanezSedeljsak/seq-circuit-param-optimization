@@ -52,7 +52,10 @@ class GeneticAlgorithm(OptimizationAlgorithm):
 
             current_best = best_individual
 
-            self.generations_evaluations[itt] = current_eval
+            if len(self.generations_evaluations) == 0:
+                self.generations_evaluations[itt] = current_eval
+            else:
+                self.generations_evaluations[itt] = current_eval if current_eval > max(self.generations_evaluations.values()) else max(self.generations_evaluations.values())
 
         return current_best
 

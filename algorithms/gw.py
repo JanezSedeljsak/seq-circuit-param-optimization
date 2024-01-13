@@ -91,11 +91,15 @@ class GreyWolfOptimizer(OptimizationAlgorithm):
 
             current_eval = -self._evaluate_function(alpha)
             convergence_curve.append(current_eval)
+
             if best_params is None or current_eval < -self._evaluate_function(best_params):
                 self.do_print(f"[{generation}] Best Fitness: {current_eval}")
                 best_params = alpha.copy()
 
-            self.generations_evaluations[generation] = current_eval
+            if len(self.generations_evaluations) == 0:
+                self.generations_evaluations[generation] = current_eval
+            else:
+                self.generations_evaluations[generation] = current_eval if current_eval < min(self.generations_evaluations.values()) else min(self.generations_evaluations.values())
 
             for i in range(population_size):
                 population[i] = self._update_position(population[i], alpha, beta, delta)
